@@ -69,7 +69,7 @@ export function TodoForm({ onSubmit, editingTodo, onCancelEdit, profileColor }: 
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="新しいタスクを入力..."
+          placeholder="新しいタスクを追加..."
           className={`flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none ${colorClasses.border} transition-colors`}
         />
         <button

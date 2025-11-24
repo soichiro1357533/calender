@@ -43,7 +43,7 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit, profileColor }: Tod
               : `border-gray-300 ${colorClasses.border}`
           }
         `}
-        aria-label={todo.completed ? '未完了にする' : '完了にする'}
+        aria-label={todo.completed ? '未完了に戻す' : '完了にする'}
       >
         {todo.completed && <Check className="w-4 h-4 text-white" />}
       </button>

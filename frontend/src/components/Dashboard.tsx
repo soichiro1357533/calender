@@ -7,24 +7,21 @@ interface DashboardProps {
   selectedDate: Date;
 }
 
-export function Dashboard({ todos, profile, selectedDate }: DashboardProps) {
+export function Dashboard({ todos, profile }: DashboardProps) {
   const totalTodos = todos.length;
   const completedTodos = todos.filter((t) => t.completed).length;
-  const inProgressTodos = totalTodos - completedTodos;
   const completionRate = totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0;
 
-  // Today's tasks
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const todayTodos = todos.filter((t) => t.date === todayStr);
   const todayCompleted = todayTodos.filter((t) => t.completed).length;
 
-  // This week's tasks
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay());
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
-  
+
   const weekTodos = todos.filter((t) => {
     const todoDate = new Date(t.date);
     return todoDate >= weekStart && todoDate <= weekEnd;
@@ -50,7 +47,7 @@ export function Dashboard({ todos, profile, selectedDate }: DashboardProps) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-1">総タスク数</p>
+            <p className="text-sm text-gray-600 mb-1">合計タスク数</p>
             <p className="text-gray-900">{totalTodos}</p>
           </div>
           <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getColorClass(profile.color)} flex items-center justify-center`}>
@@ -63,7 +60,7 @@ export function Dashboard({ todos, profile, selectedDate }: DashboardProps) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-1">完了済み</p>
+            <p className="text-sm text-gray-600 mb-1">完了タスク</p>
             <p className="text-gray-900">{completedTodos}</p>
           </div>
           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">

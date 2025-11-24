@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from './components/Calendar';
 import { TodoList } from './components/TodoList';
 import { TodoForm } from './components/TodoForm';
@@ -21,10 +21,19 @@ export interface Profile {
 }
 
 const defaultProfiles: Profile[] = [
-  { id: '1', name: '仕事', color: 'blue', icon: 'briefcase' },
-  { id: '2', name: '趣味', color: 'purple', icon: 'palette' },
-  { id: '3', name: 'プライベート', color: 'green', icon: 'home' },
+  { id: '1', name: 'Work', color: 'blue', icon: 'briefcase' },
+  { id: '2', name: 'Creative', color: 'purple', icon: 'palette' },
+  { id: '3', name: 'Home', color: 'green', icon: 'home' },
 ];
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 'http://localhost:8081';
+
+const normalizeTodoDate = (todo: Todo): Todo => ({
+  ...todo,
+  // backend returns ISO string; keep YYYY-MM-DD for UI filters
+  date: todo.date?.slice(0, 10),
+});
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -50,38 +59,108 @@ export default function App() {
     (todo) => todo.date === selectedDateStr
   );
 
-  const handleAddTodo = (text: string) => {
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      text,
-      completed: false,
-      date: selectedDateStr,
-      profileId: activeProfileId,
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchTodos = async () => {
+      try {
+        const params = new URLSearchParams({
+          date: selectedDateStr,
+          profileId: activeProfileId,
+        });
+        const res = await fetch(`${API_BASE_URL}/api/todos?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          throw new Error(`failed to fetch todos: ${res.status}`);
+        }
+        const data = await res.json();
+        if (!Array.isArray(data)) {
+          setTodos([]);
+          return;
+        }
+        setTodos(data.map(normalizeTodoDate));
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        console.error(err);
+      }
     };
-    setTodos([...todos, newTodo]);
+
+    fetchTodos();
+    return () => controller.abort();
+  }, [activeProfileId, selectedDateStr]);
+
+  const handleAddTodo = async (text: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/todos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          date: selectedDateStr,
+          profileId: activeProfileId,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(`failed to create todo: ${res.status}`);
+      }
+      const created: Todo = await res.json();
+      setTodos((prev) => [...prev, normalizeTodoDate(created)]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleUpdateTodo = (id: string, text: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, text } : todo
-      )
-    );
-    setEditingTodo(null);
-  };
-
-  const handleToggleTodo = (id: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-
-  const handleDeleteTodo = (id: string) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-    if (editingTodo?.id === id) {
+  const handleUpdateTodo = async (id: string, text: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        throw new Error(`failed to update todo: ${res.status}`);
+      }
+      const updated: Todo = await res.json();
+      setTodos((prev) => prev.map((todo) => (todo.id === id ? normalizeTodoDate(updated) : todo)));
       setEditingTodo(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleTodo = async (id: string) => {
+    const target = todos.find((todo) => todo.id === id);
+    if (!target) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: !target.completed }),
+      });
+      if (!res.ok) {
+        throw new Error(`failed to toggle todo: ${res.status}`);
+      }
+      const updated: Todo = await res.json();
+      setTodos((prev) => prev.map((todo) => (todo.id === id ? normalizeTodoDate(updated) : todo)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/todos/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        throw new Error(`failed to delete todo: ${res.status}`);
+      }
+      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+      if (editingTodo?.id === id) {
+        setEditingTodo(null);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -164,7 +243,7 @@ export default function App() {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
-                  weekday: 'long',
+              weekday: 'long',
                 })}
               </h2>
               <p className="text-gray-500 text-sm">
