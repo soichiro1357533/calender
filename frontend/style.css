@@ -64,9 +64,14 @@ h1 {
 }
 
 /* ToDoリストのスタイル (前回と同様) */
-#todo-list {
+#todo-list, #completed-todo-list {
     list-style: none;
     padding: 0;
+}
+
+#todo-list li,
+#completed-todo-list {
+    margin-top: 10px;
 }
 
 #todo-list li {
@@ -94,12 +99,27 @@ h1 {
     color: #888;
 }
 
-.delete-btn {
-    background-color: #d9534f;
-    color: white;
+button.primary,
+button.secondary {
+    margin-left: 10px;
+    background-color: #6c757d;
+    color: #fff;
     border: none;
-    padding: 3px 8px;
+    padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+}
+
+button.primary {
+    background-color: #007bff;
+}
+
+button.danger {
+    margin-left: 10px;
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
 }

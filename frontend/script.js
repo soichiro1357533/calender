@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const todoList = document.getElementById('todo-list');
+    const completedTodoList = document.getElementById('completed-todo-list');
     const addTodoForm = document.getElementById('add-todo-form');
     const newTodoTitleInput = document.getElementById('new-todo-title');
     const newTodoDueDateInput = document.getElementById('new-todo-due-date');
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // タスクを画面に描画する関数
     function renderTodos(todos) {
         todoList.innerHTML = '';
+        completedTodoList.innerHTML = '';
         const calendarEvents = [];
 
         todos.forEach(todo => {
@@ -52,28 +54,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkbox.type = 'checkbox';
                 checkbox.checked = todo.completed;
                 checkbox.addEventListener('change', () => toggleComplete(todo.id, !todo.completed));
-                
+
                 // タスク名
                 const span = document.createElement('span');
+                span.classList.add('todo-title');
                 span.textContent = ` ${todo.title} (期限: ${todo.dueDate})`;
 
-                // 削除ボタン
+                // 編集ボタン
                 const editButton = document.createElement('button');
                 editButton.textContent = '編集';
-                editButton.style.marginLeft = '10px';
+                editButton.classList.add('secondary');
                 editButton.addEventListener('click', () => toggleEditMode(li, todo));
 
                 // 削除ボタン
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '削除';
-                deleteButton.style.marginLeft = '10px'; // 見た目のためのスペース
+                deleteButton.classList.add('danger');
                 deleteButton.addEventListener('click', () => deleteTask(todo.id));
 
                 li.appendChild(checkbox);
                 li.appendChild(span);
                 li.appendChild(editButton);
                 li.appendChild(deleteButton);
-                todoList.appendChild(li);
+
+                if (todo.completed) {
+                    li.classList.add('completed');
+                    completedTodoList.appendChild(li);
+                } else {
+                    todoList.appendChild(li);
+                }
+            
+
             }
             // カレンダー用のイベントデータを作成
             calendarEvents.push({
@@ -179,11 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const saveButton = document.createElement('button');
         saveButton.textContent = '保存';
-        saveButton.style.marginLeft = '10px';
+        saveButton.classList.add('primary');
 
         const cancelButton = document.createElement('button');
         cancelButton.textContent = 'キャンセル';
-        cancelButton.style.marginLeft = '5px';
+        cancelButton.classList.add('secondary');
 
         li.appendChild(titleInput);
         li.appendChild(dueDateInput);
