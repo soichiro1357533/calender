@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const todoList = document.getElementById('todo-list');
+    const completedTodoList = document.getElementById('completed-todo-list');
     const addTodoForm = document.getElementById('add-todo-form');
     const newTodoTitleInput = document.getElementById('new-todo-title');
     const newTodoDueDateInput = document.getElementById('new-todo-due-date');
@@ -36,53 +37,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function createTodoListItem(todo, isCompleted) {
+        const li = document.createElement('li');
+        li.dataset.id = todo.id;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = isCompleted;
+        checkbox.addEventListener('change', () => toggleComplete(todo.id, !isCompleted));
+
+        const span = document.createElement('span');
+        span.classList.add('todo-title');
+        span.textContent = ` ${todo.title} (期限: ${todo.dueDate})`;
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '編集';
+        editButton.classList.add('secondary');
+        editButton.addEventListener('click', () => toggleEditMode(li, todo));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '削除';
+        deleteButton.classList.add('danger');
+        deleteButton.addEventListener('click', () => deleteTask(todo.id));
+
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(editButton);
+        li.appendChild(deleteButton);
+
+        if (isCompleted) {
+            li.classList.add('completed');
+        }
+
+        return li;
+    }
+
     // タスクを画面に描画する関数
     function renderTodos(todos) {
         todoList.innerHTML = '';
+        completedTodoList.innerHTML = '';
         const calendarEvents = [];
 
         todos.forEach(todo => {
-            // 未完了のタスクのみリストに表示
-            if (!todo.completed) {
-                const li = document.createElement('li');
-                li.dataset.id = todo.id;
+            const isCompleted = todo.completed === true || todo.completed === 1 || todo.completed === '1';
+            const todoItem = createTodoListItem(todo, isCompleted);
+            const targetList = isCompleted ? completedTodoList : todoList;
+            targetList.appendChild(todoItem);
 
-                // チェックボックス
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = todo.completed;
-                checkbox.addEventListener('change', () => toggleComplete(todo.id, !todo.completed));
-                
-                // タスク名
-                const span = document.createElement('span');
-                span.textContent = ` ${todo.title} (期限: ${todo.dueDate})`;
-
-                // 削除ボタン
-                const editButton = document.createElement('button');
-                editButton.textContent = '編集';
-                editButton.style.marginLeft = '10px';
-                editButton.addEventListener('click', () => toggleEditMode(li, todo));
-
-                // 削除ボタン
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = '削除';
-                deleteButton.style.marginLeft = '10px'; // 見た目のためのスペース
-                deleteButton.addEventListener('click', () => deleteTask(todo.id));
-
-                li.appendChild(checkbox);
-                li.appendChild(span);
-                li.appendChild(editButton);
-                li.appendChild(deleteButton);
-                todoList.appendChild(li);
-            }
-            // カレンダー用のイベントデータを作成
             calendarEvents.push({
                 id: todo.id,
                 title: todo.title,
                 start: todo.dueDate,
                 allDay: true,
-                backgroundColor: todo.completed ? 'gray' : '#007bff',
-                borderColor: todo.completed ? 'gray' : '#007bff'
+                backgroundColor: isCompleted ? 'gray' : '#007bff',
+                borderColor: isCompleted ? 'gray' : '#007bff'
             });
         });
 
@@ -164,8 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 編集モードに切り替える関数
     function toggleEditMode(li, todo) {
         // 既存のタスク表示をクリア
-        const span = li.querySelector('span');
-        const editButton = li.querySelector('button'); // 最初のボタンが編集ボタン
         li.innerHTML = ''; // チェックボックスなども含めて一旦クリア
 
         // 編集用の入力フォームを作成
@@ -179,11 +185,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const saveButton = document.createElement('button');
         saveButton.textContent = '保存';
-        saveButton.style.marginLeft = '10px';
+        saveButton.classList.add('primary');
 
         const cancelButton = document.createElement('button');
         cancelButton.textContent = 'キャンセル';
-        cancelButton.style.marginLeft = '5px';
+        cancelButton.classList.add('secondary');
 
         li.appendChild(titleInput);
         li.appendChild(dueDateInput);
