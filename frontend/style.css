@@ -1,0 +1,105 @@
+/* style.css (一部修正・追加) */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.main-content {
+    display: flex;
+    gap: 30px;
+}
+
+.todo-form-area {
+    width: 300px; /* ToDoリストとフォームの幅を固定 */
+    flex-shrink: 0;
+}
+
+#calendar {
+    flex-grow: 1; /* カレンダーが残りのスペースを占める */
+    max-width: 900px;
+}
+
+/* ToDo入力フォームのスタイル */
+#add-todo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+#new-todo-title, #new-todo-due-date, #add-todo-form button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#add-todo-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#add-todo-form button:hover {
+    background-color: #0056b3;
+}
+
+/* ToDoリストのスタイル (前回と同様) */
+#todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+#todo-list li {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.todo-title {
+    flex-grow: 1;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.completed {
+    background-color: #e0f7fa !important;
+}
+
+.completed .todo-title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.delete-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
